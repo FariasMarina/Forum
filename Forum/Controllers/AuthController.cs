@@ -12,9 +12,29 @@ namespace Forum.Controllers
         private readonly ILogger<AuthController> _logger;
         private static List<User> users = new();
         private bool usernameExists = false;
+        private const int MinimunLengthPassword = 6;
         public AuthController(ILogger<AuthController> logger)
         {
             _logger = logger;
+        }
+
+        private (string ErrorMessage, bool IsOk) IsAccountAvailable( AuthRequest authRequest)
+        {
+            if (usernameExists)
+            {
+                return ("Este username ou e-email já está em uso.", false);
+            }
+
+            if (authRequest.Password.Length < MinimunLengthPassword)
+            {
+                return ("Sua senha deve ser de no mínimo 6 caracteres.", false);
+            }
+
+            if (!IsValidEmails.IsValidEmail(authRequest.Address))
+            {
+                return ("Utilize um e-mail válido. Exemplo: xxx@xxx.com", false);
+            }
+            return (String.Empty, true);
         }
 
         //Endpoint de cadastro de usuário-------------------
@@ -28,32 +48,27 @@ namespace Forum.Controllers
             {
                 Console.WriteLine(user.Username);
 
-                if (user.Username.Contains(authRequest.Username) || user.Address.Contains(authRequest.Address))
+                if (user.Username.Equals(authRequest.Username) || user.Address.Equals(authRequest.Address))
                 {
                     usernameExists = true;
                     break;
                 }
             }
 
-            if (usernameExists)
+            var responseAccountVerification = IsAccountAvailable(authRequest);
+
+
+            if (responseAccountVerification.IsOk) //Item 1 e 2 dos retornos do método. 
             {
-                return ("Este username ou e-email já está em uso.");
+                users.Add(new User(Guid.NewGuid(), authRequest.Username, authRequest.Address, authRequest.Password));
+                return ("Usuário foi criado com sucesso.");
+            } else
+            {
+                return responseAccountVerification.ErrorMessage;
             }
 
-            var minimunLengthPassword = 6;
 
-            if (authRequest.Password.Length < minimunLengthPassword)
-            {
-                return ("Sua senha deve ser de no mínimo 6 caracteres.");
-            }
-
-            if (!IsValidEmails.IsValidEmail(authRequest.Address))
-            {
-                return ("Utilize um e-mail válido. Exemplo: xxx@xxx.com");
-            }
-
-            users.Add(new User(Guid.NewGuid(), authRequest.Username, authRequest.Address, authRequest.Password));
-            return ("Usuário foi criado com sucesso.");
+            return String.Empty;
         }
 
     }
