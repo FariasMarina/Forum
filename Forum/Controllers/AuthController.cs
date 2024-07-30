@@ -38,6 +38,7 @@ namespace Forum.Controllers
         }
 
         //Endpoint de cadastro de usuário-------------------
+
         [HttpPost("cadastro")] //Nome da rota (ex. auth/cadastro)
         public string Username([FromBody] AuthRequest authRequest) 
         {
@@ -60,7 +61,8 @@ namespace Forum.Controllers
 
             if (responseAccountVerification.IsOk) //Item 1 e 2 dos retornos do método. 
             {
-                users.Add(new User(Guid.NewGuid(), authRequest.Username, authRequest.Address, authRequest.Password));
+                users.Add(new User(Guid.NewGuid(), authRequest.Username, authRequest.Address, authRequest.Password, DateTime.UtcNow));
+                _logger.LogInformation("Usuário "+authRequest.Username+" foi criado.");
                 return ("Usuário foi criado com sucesso.");
             } else
             {
