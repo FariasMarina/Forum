@@ -16,11 +16,6 @@ namespace Forum.Controllers
             _logger = logger;
         }
 
-
-
-
-
-
         //ENDPOINT DE CRIAÇÃO DE POSTS 
 
         [HttpPost("publicar")]
@@ -42,7 +37,6 @@ namespace Forum.Controllers
             _logger.LogInformation("Post criado.");
             return "Artigo criado com sucesso.";
 
-            return String.Empty;
         }
 
     }
